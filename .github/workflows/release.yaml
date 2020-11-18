@@ -12,7 +12,8 @@ env:
 jobs:
   build-linux:
     runs-on: ubuntu-latest
-
+    env:
+      channel: linux
     steps:
       - name: Get the version
         id: get_version
@@ -22,6 +23,13 @@ jobs:
         with:
           toolchain: stable
           override: true
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ env.channel }}-${{ hashFiles('**/Cargo.lock') }}
       - name: Build and release
         run: |
           cargo build --release
@@ -29,20 +37,20 @@ jobs:
       - uses: papeloto/action-zip@v1
         with:
           files: target/release/${{ env.binary }}
-          dest: ${{ env.binary }}-linux.zip
+          dest: ${{ env.binary }}.zip
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ${{ env.binary }}-linux.zip
-          asset_name: ${{ env.binary }}-linux-${{ steps.get_version.outputs.VERSION }}.zip
+          file: ${{ env.binary }}.zip
+          asset_name: ${{ env.binary }}-${{ env.channel }}-${{ steps.get_version.outputs.VERSION }}.zip
           tag: ${{ github.ref }}
           overwrite: true
       - uses: josephbmanley/butler-publish-itchio-action@master
         env:
           BUTLER_CREDENTIALS: ${{ secrets.BUTLER_CREDENTIALS }}
-          CHANNEL: linux
+          CHANNEL: ${{ env.channel }}
           ITCH_GAME: ${{ env.itch_name }}
           ITCH_USER: vleue
-          PACKAGE: ${{ env.binary }}-linux.zip
+          PACKAGE: ${{ env.binary }}.zip
           VERSION: ${{ steps.get_version.outputs.VERSION }}
