@@ -29,13 +29,12 @@ jobs:
       - uses: papeloto/action-zip@v1
         with:
           files: target/release/${{ env.binary }}
-          dest: ${{ env.binary }}-linux.zip
+          dest: ${{ env.binary }}-linux-${{ steps.get_version.outputs.VERSION }}.zip
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ${{ env.binary }}-linux.zip
-          asset_name: ${{ env.binary }}-linux-${{ steps.get_version.outputs.VERSION }}.zip
+          file: ${{ env.binary }}-linux-${{ steps.get_version.outputs.VERSION }}.zip
           tag: ${{ github.ref }}
           overwrite: true
       - uses: josephbmanley/butler-publish-itchio-action@master
@@ -44,4 +43,4 @@ jobs:
           CHANNEL: linux
           ITCH_GAME: ${{ env.itch_name }}
           ITCH_USER: vleue
-          PACKAGE: build/windows
+          PACKAGE: ${{ env.binary }}-linux-${{ steps.get_version.outputs.VERSION }}.zip
