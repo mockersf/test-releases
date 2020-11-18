@@ -7,6 +7,7 @@ on:
 
 env:
   binary: releasable
+  itch_name: wotm
 
 jobs:
   build-linux:
@@ -37,3 +38,10 @@ jobs:
           asset_name: ${{ env.binary }}-linux-${{ steps.get_version.outputs.VERSION }}.zip
           tag: ${{ github.ref }}
           overwrite: true
+      - uses: josephbmanley/butler-publish-itchio-action@master
+        env:
+          BUTLER_CREDENTIALS: ${{ secrets.BUTLER_CREDENTIALS }}
+          CHANNEL: linux
+          ITCH_GAME: ${{ env.itch_name }}
+          ITCH_USER: vleue
+          PACKAGE: build/windows
